@@ -1,0 +1,130 @@
+<!-- Copyright 2019 XEBIALABS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<!--
+All SVG paths are pulled from XLD 9.0.3
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous">
+    </script>
+    <script src="echarts.min.js"></script>
+    <link rel="stylesheet" href="dependencies-tile.css" type="text/css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+</head>
+<script>
+    window.addEventListener("xlrelease.load", function () {
+        window.xlrelease.queryTileData(function (response) {
+            var nodes = response.data.data.nodes;
+            var links = response.data.data.links;
+            var categories = response.data.data.categories;
+            var dom = document.getElementById("main");
+            var myChart = echarts.init(dom);
+            function dependenciesModal(param) {
+               if (param.dataType == 'node') {
+                    document.getElementById("application-name").innerHTML = '<div class="icon baseline">' +
+                        '<svg width="20" height="20" viewBox="0 0 20 20">' +
+                        '<path id="icon-info" d="M2.5 6.25h3.75V2.5H2.5v3.75zM8.125 17.5h3.75v-3.75h-3.75v3.75zm-5.625 0h3.75v-3.75H2.5v3.75zm0-5.625h3.75v-3.75H2.5v3.75zm5.625 0h3.75v-3.75h-3.75v3.75zM13.75 2.5v3.75h3.75V2.5h-3.75zM8.125 6.25h3.75V2.5h-3.75v3.75zm5.625 5.625h3.75v-3.75h-3.75v3.75zm0 5.625h3.75v-3.75h-3.75v3.75z">' +
+                        '</path>' +
+                        '</svg>' +
+                        '</div>' +
+                        '&nbsp;' + nodes[param.dataIndex].name
+                    document.getElementById("latest-version").innerHTML = nodes[param.dataIndex].lastVersion
+                    document.getElementById("dependencies").innerHTML = nodes[param.dataIndex].dependenciesCount + ' Applications'
+                    document.getElementById("depended-upon").innerHTML = nodes[param.dataIndex].dependedUponCount + ' Applications'
+                }
+            }
+            myChart.on('mouseover', dependenciesModal);
+            option = {
+                legend: [{
+                    // selectedMode: 'single',
+                    data: categories.map(function (a) {
+                        return a.name;
+                    }),
+                    type: 'scroll',
+                    orient: "vertical",
+                    left: 0,
+                    icon: 'path://M16.4 14.8H3.6v-8h12.8v8zm0-9.6H10L8.4 3.6H3.6c-.888 0-1.6.712-1.6 1.6v9.6a1.6 1.6 0 0 0 1.6 1.6h12.8a1.6 1.6 0 0 0 1.6-1.6v-8a1.6 1.6 0 0 0-1.6-1.6z'
+                }],
+                animationDurationUpdate: 1500,
+                animationEasingUpdate: 'quinticInOut',
+                series : [
+                    {
+                        name: 'Dependencies',
+                        type: 'graph',
+                        layout: 'circular',
+                        circular: {
+                            rotateLabel: true
+                        },
+                        data: nodes,
+                        links: links,
+                        categories: categories,
+                        roam: true,
+                        focusNodeAdjacency: true,
+                        label: {
+                            normal: {
+                                position: 'right',
+                                formatter: '{b}'
+                            }
+                        },
+                        lineStyle: {
+                            normal: {
+                                color: 'source',
+                                curveness: 0.3
+                            }
+                        }
+                    }
+                ]
+            };
+            if (option && typeof option === "object") {
+                myChart.setOption(option, true);
+            }
+        });
+    });
+</script>
+<body>
+    <div id="main" class="graph"></div>
+    <!-- Dependencies Counts at the bottom of the window -->
+    <div class="container dependency-detail">
+      <div class="row">
+        <h6 id="application-name">
+          <div class="icon baseline">
+            <svg width="88.9" height="88.9" viewBox="0 0 88.9 88.9">
+               <path id="icon-info" d="M44.3 2.4C21.1 2.4 2.4 21.3 2.4 44.3c0 23.2 18.8 41.9 41.9 41.9s41.9-18.8 41.9-41.9c.1-23-18.6-41.9-41.9-41.9zm6.5 65c0 3.5-2.9 6.4-6.4 6.4S38 70.9 38 67.4V39.6c0-3.5 2.9-6.4 6.4-6.4s6.4 2.9 6.4 6.4v27.8zm-6.5-39.5c-3.8 0-7-3.1-7-7 0-3.8 3.1-7 7-7s7 3.1 7 7-3.1 7-7 7z">
+              </path>
+            </svg>
+          </div>
+          Hover over an application to see additional detail
+        </h6>
+      </div>
+      <div class="row">
+        <div class="col">
+        <h6>Latest Version</h6>
+        <h7 id="latest-version">-</h7>
+        </div>
+        <div class="col">
+        <h6>Depends On</h6>
+        <h7 id="dependencies">-</h7>
+        </div>
+        <div class="col">
+        <h6>Depended Upon By</h6>
+        <h7 id="depended-upon">-</h7>
+        </div>
+      </div>
+    </div>
+</body>
+</html>
