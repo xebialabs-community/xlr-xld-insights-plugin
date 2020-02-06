@@ -1,0 +1,86 @@
+<!--
+
+    Copyright 2020 XEBIALABS
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<script src="echarts.min.js"></script>
+<link rel="stylesheet" href="change-failure-tile.css" type="text/css">
+<script>
+window.addEventListener("xlrelease.load", function () {
+    window.xlrelease.queryTileData(function (response) {
+        var change_failure = response.data.data.change_failure
+        for (var i = 0; i < change_failure.length; i++) {
+            change_failure[i] = change_failure[i].toFixed(2);
+        }
+        var dom = document.getElementById("chart");
+        var chart = echarts.init(dom);
+        option = {
+            tooltip: {
+                trigger: 'axis',
+            },
+            legend: {
+                data: ['Deployments', 'Change Failure']
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: response.data.data.dates,
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    name: 'Deployment Count',
+                    axisLabel: {
+                        formatter: '{value}'
+                    }
+                },
+                {
+                    type: 'value',
+                    name: 'Change Failure (%)',
+                    min: 0,
+                    max: 100,
+                    interval: 100,
+                    axisLabel: {
+                        formatter: '{value}%'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: 'Deployments',
+                    type: 'bar',
+                    yAxisIndex: 0,
+                    data: response.data.data.deployments
+                },
+                {
+                    name: 'Change Failure',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: change_failure
+                }
+            ]
+        };
+        if (option && typeof option === "object") {
+                chart.setOption(option, true);
+        }
+    });
+});
+</script>
+</head>
+<body class="chart">
+<div id="chart"></div>
+</body>
+</html>

@@ -6,7 +6,6 @@ buildscript {
       url 'https://dist.xebialabs.com/public/maven2'
     }
   }
-
 }
 
 plugins {
